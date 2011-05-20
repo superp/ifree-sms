@@ -1,0 +1,18 @@
+= IfreeSms
+
+The IfreeSms gem for i-free sms provider
+
+== Install
+  
+  gem 'ifree-sms'
+
+  rails generate ifree_sms:install
+  
+== Usage
+
+Use middleware with options:
+
+  # Initialize IfreeSms and set its configurations.
+  config.app_middleware.use IfreeSms::Manager do |config|
+    config.routes = { "/posts/votes" => "Post" }
+  end

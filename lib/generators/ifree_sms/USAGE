@@ -1,0 +1,7 @@
+Usage:
+  rails generate ifree_sms:install
+
+Options:
+                 
+Example:
+  rails g ifree_sms:install
