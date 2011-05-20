@@ -13,11 +13,10 @@ module BallotBox
       def self.extended(base)
         base.class_eval do
           # Associations
-          belongs_to :voteable, :polymorphic => true
-          belongs_to :voter, :polymorphic => true
+          belongs_to :messageable, :polymorphic => true
           
           # Validations
-          validates_presence_of :ip_address, :user_agent, :voteable_id, :voteable_type
+          validates :sms_id, :user_agent, :voteable_id, :voteable_type
           validates_numericality_of :value, :only_integer => true
           
           # Callbacks
