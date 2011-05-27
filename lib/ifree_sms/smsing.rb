@@ -1,9 +1,8 @@
 # encoding: utf-8
-require 'ipaddr'
-require "browser"
+require "curb"
 
-module BallotBox
-  module Voting
+module IfreeSms
+  module Smsing
     def self.included(base)
       base.send :include, InstanceMethods
       base.send :extend,  ClassMethods
@@ -16,63 +15,48 @@ module BallotBox
           belongs_to :messageable, :polymorphic => true
           
           # Validations
-          validates :sms_id, :user_agent, :voteable_id, :voteable_type
-          validates_numericality_of :value, :only_integer => true
+          validates :sms_id, :phone, :service_number, :sms_text, :now
           
           # Callbacks
-          before_save :parse_browser
           after_save :update_cached_columns
           after_destroy :update_cached_columns
 
-          attr_accessible :request
+          attr_accessible :request, :md5key
           
-          composed_of :ip,
-            :class_name => 'IPAddr',
-            :mapping => %w(ip_address to_i),
-            :constructor => Proc.new { |ip_address| IPAddr.new(ip_address, Socket::AF_INET) },
-            :converter => Proc.new { |value| value.is_a?(Integer) ? IPAddr.new(value, Socket::AF_INET) : IPAddr.new(value.to_s) }
-          
-          scope :with_voteable, lambda { |record| where(["voteable_id = ? AND voteable_type = ?", record.id, record.class.name]) }
+          scope :with_messageable, lambda { |record| where(["messageable_id = ? AND messageable_type = ?", record.id, record.class.name]) }
         end
       end
       
-      def chart(mode)
-        result = case mode.to_s.downcase
-          when 'dates' then chart_dates
-          when 'browsers' then chart_browsers
-          when 'platforms' then chart_platforms
-        end
+      def self.send_sms(phone, text, sms_id='noID')
+        #http://srv1.com.ua/mcdonalds/second.php?smsId=noID&phone=380971606179&serviceNumber=3533&smsText=test-message&md5key=f920c72547012ece62861938b7731415&now=20110527160613
+        params = {}
+        params[:smsId] = sms_id
+        params[:phone] = phone
+        params[:serviceNumber] = IfreeSms::Config.config
+        params[:phone] = phone
+        params[:phone] = phone
         
-        [ result ].to_json
+        
+        c = Curl::Easy.new("http://srv1.com.ua/#{@config.project_name}/second.php?#{to_url_params(params)}")
+        
+        c.perform
+        puts c.body_str
       end
       
       protected
       
-        def chart_dates
-          data = scoped.select("DATE(created_at) AS created_at, SUM(value) AS rating").group("DATE(created_at)").all
-          data.collect { |item| [ item.created_at, item.rating.to_i ] }
+        def self.to_url_params(hash)
+          elements = []
+          hash.keys.size.times do |i|
+            elements << "#{hash.keys[i]}=#{hash.values[i]}"
+          end
+          elements.join('&')
         end
-        
-        def chart_browsers
-          data = scoped.select("browser_name, SUM(value) AS rating").group("browser_name").all
-          data.collect { |item| [ item.browser_name, item.rating.to_i ] }
-        end
-        
-        def chart_platforms
-          data = scoped.select("browser_platform, SUM(value) AS rating").group("browser_platform").all
-          data.collect { |item| [ item.browser_platform, item.rating.to_i ] }
-        end
+      
+ 
     end
     
     module InstanceMethods
-    
-      def browser
-        @browser ||= Browser.new(:ua => user_agent, :accept_language => "en-us")
-      end
-      
-      def anonymous?
-        voter.nil?
-      end
       
       def as_json(options = nil)
         options = { 
@@ -88,14 +72,28 @@ module BallotBox
       end
       
       def request=(req)
-        self.ip = req.ip
-        self.user_agent = req.user_agent
-        self.referrer = req.referer
-        self.voteable_id = req.params["id"]
+        self.sms_id = req.params["smsId"]
+        self.phone = req.params["phone"]
+        self.service_number = req.params["serviceNumber"]
+        self.sms_text = req.params["smsText"]
+        self.now = req.params["now"]
+        self.md5key = req.params["md5key"]
+        self.messageable_id = messageable.class.find_by_sms_text(self.sms_text)
+        
         @request = req
       end
       
-      def call
+      def config
+        @config
+      end
+      
+      def config=(conf)
+        self.messageable_type = conf.routes[ @request.path_info ]
+        
+        @config = conf
+      end
+      
+      def call 
         if register
           [self.to_json, 200]
         else
@@ -104,27 +102,21 @@ module BallotBox
       end
       
       def register
-        if voteable && voteable.ballot_box_valid?(self)
-          voteable.current_vote = self
+        if messageable && messageable.ifree_sms_valid?(self)
+          messageable.current_message = self
           
-          voteable.run_callbacks(:vote) do
+          messageable.run_callbacks(:message) do
             errors.empty? && save
           end
         end
       end
       
       protected
-      
-        def parse_browser
-          self.browser_name = browser.id.to_s
-          self.browser_version = browser.version
-          self.browser_platform = browser.platform.to_s
-        end
         
         def update_cached_columns
-          if voteable && voteable.ballot_box_cached_column
-            count = voteable.votes.select("SUM(value)")
-            voteable.class.update_all("#{voteable.ballot_box_cached_column} = (#{count.to_sql})", ["id = ?", voteable.id])
+          if messageable && messageable.ifree_sms_cached_column
+            count = messageable.messages.select("COUNT(id)")
+            messageable.class.update_all("#{messageable.ifree_sms_cached_column} = (#{count.to_sql})", ["id = ?", messageable.id])
           end
         end
     end

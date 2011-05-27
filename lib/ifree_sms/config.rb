@@ -4,7 +4,7 @@ module IfreeSms
     # Creates an accessor that simply sets and reads a key in the hash:
     #
     # class Config < Hash
-    #   hash_accessor :routes, :secret_key
+    #   hash_accessor :routes, :secret_key, :service_number, :project_name
     # end
     #
     # config = Config.new
@@ -25,12 +25,14 @@ module IfreeSms
       end
     end
     
-    hash_accessor :routes, :secret_key
+    hash_accessor :routes, :secret_key, :service_number, :project_name
     
     def initialize(other={})
       merge!(other)
-      self[:routes] ||= { "/ifree_sms/message" => 'Class' }
+      self[:routes] ||= { "/ifree/sms" => 'Class' }
       self[:secret_key] ||= "some_very_secret_key_given_ifree"
+      self[:service_number] ||= "some_service_number"
+      self[:project_name] ||= "project_name"
     end
   end
 end

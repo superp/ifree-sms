@@ -32,8 +32,7 @@ module IfreeSms
       
       def create(env, body = '', status = 500)
         request = Rack::Request.new(env)
-        message = IfreeSms::Message.new(:request => request)
-        message.messageable_type = @config.routes[ request.path_info ]
+        message = IfreeSms::Message.new(:request => request, :config => @config)
         
         _run_callbacks(:before_message, env, message)
         
