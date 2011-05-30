@@ -70,13 +70,11 @@ module IfreeSms
         @request = req
       end
       
-      def to_ifree        
-        answer = self.test.blank? ? self.answer_text : self.test
-        
-        if self.answer_text.blank? && self.test.blank?
+      def to_ifree    
+        if self.answer_text.blank?
           "<Response noresponse='true'/>"
         else
-          "<Response><SmsText>#{answer}</SmsText></Response>"
+          "<Response><SmsText>#{self.answer_text}</SmsText></Response>"
         end   
       end
       
@@ -88,6 +86,9 @@ module IfreeSms
         end
       end
       
+      def test?
+        !self.test.blank?
+      end
       
       def send_answer(text)
         self.class.send_sms(self.phone, text, self.sms_id)

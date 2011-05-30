@@ -34,11 +34,15 @@ module IfreeSms
         request = Rack::Request.new(env)
         message = IfreeSms::Message.new(:request => request)
         
-        _run_callbacks(:before_message, env, message)
-        
-        body, status = message.call
-        
-        _run_callbacks(:after_message, env, message)
+        unless message.test?
+          _run_callbacks(:before_message, env, message)
+          
+          body, status = message.call
+          
+          _run_callbacks(:after_message, env, message)
+        else
+          body, status = ["<Response><SmsText>#{message.test}</SmsText></Response>", 200]
+        end
         
         [status, {'Content-Type' => 'application/xml', 'Content-Length' => body.size.to_s}, body]
       end
