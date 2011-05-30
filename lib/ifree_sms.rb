@@ -8,7 +8,7 @@ module IfreeSms
   mattr_accessor :config
   @@config = Config.new
   
-  def self.configure(&block)
+  def self.setup(&block)
     yield config
   end
   

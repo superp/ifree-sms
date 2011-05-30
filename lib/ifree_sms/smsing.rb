@@ -1,5 +1,7 @@
 # encoding: utf-8
 require "curb"
+require 'digest/md5'
+require 'uri'
 
 module IfreeSms
   module Smsing
@@ -21,7 +23,7 @@ module IfreeSms
           after_save :update_cached_columns
           after_destroy :update_cached_columns
 
-          attr_accessible :request, :md5key
+          attr_accessible :request, :md5key, :test
           
           scope :with_messageable, lambda { |record| where(["messageable_id = ? AND messageable_type = ?", record.id, record.class.name]) }
         end
@@ -29,12 +31,15 @@ module IfreeSms
       
       def self.send_sms(phone, text, sms_id='noID')
         #http://srv1.com.ua/mcdonalds/second.php?smsId=noID&phone=380971606179&serviceNumber=3533&smsText=test-message&md5key=f920c72547012ece62861938b7731415&now=20110527160613
+        now = I18n.l(DateTime.now, :format => "%Y%m%d%H%M%S")
+        
         params = {}
         params[:smsId] = sms_id
         params[:phone] = phone
-        params[:serviceNumber] = IfreeSms::Config.config
-        params[:phone] = phone
-        params[:phone] = phone
+        params[:serviceNumber] = IfreeSms.config.service_number
+        params[:smsText] = text
+        params[:now] = now
+        params[:md5key] = calc_digest(IfreeSms.config.service_number, text, IfreeSms.config.secret_key, now)
         
         
         c = Curl::Easy.new("http://srv1.com.ua/#{@config.project_name}/second.php?#{to_url_params(params)}")
@@ -48,24 +53,19 @@ module IfreeSms
         def self.to_url_params(hash)
           elements = []
           hash.keys.size.times do |i|
-            elements << "#{hash.keys[i]}=#{hash.values[i]}"
+            val = URI.escape(hash.values[i], Regexp.new("[^#{URI::PATTERN::UNRESERVED}]"))
+            elements << "#{hash.keys[i]}=#{val}"
           end
           elements.join('&')
         end
-      
+        
+        def self.calc_digest(number, text, secret, now)
+          Digest::MD5.hexdigest(number + text + secret + now)
+        end
  
     end
     
     module InstanceMethods
-      
-      def as_json(options = nil)
-        options = { 
-          :methods => [:ip], 
-          :only => [:referrer, :value, :browser_version, :browser_name, :user_agent, :browser_platform ] 
-        }.merge(options || {})
-        
-        super
-      end
       
       def request
         @request
@@ -78,24 +78,21 @@ module IfreeSms
         self.sms_text = req.params["smsText"]
         self.now = req.params["now"]
         self.md5key = req.params["md5key"]
-        self.messageable_id = messageable.class.find_by_sms_text(self.sms_text)
+        self.test = req.params["test"]
+        self.messageable = messageable.class.find_by_sms(self)
         
         @request = req
       end
       
-      def config
-        @config
-      end
-      
-      def config=(conf)
-        self.messageable_type = conf.routes[ @request.path_info ]
+      def to_ifree
+        answer = self.test.blank? ? "test answer" : self.test
         
-        @config = conf
+        "<Response><SmsText>#{answer}</SmsText></Response>"
       end
       
       def call 
-        if register
-          [self.to_json, 200]
+        if (secret_check? && errors.empty?) && (register || save)
+          [self.to_ifree, 200]
         else
           [self.errors.to_json, 422]
         end
@@ -118,6 +115,10 @@ module IfreeSms
             count = messageable.messages.select("COUNT(id)")
             messageable.class.update_all("#{messageable.ifree_sms_cached_column} = (#{count.to_sql})", ["id = ?", messageable.id])
           end
+        end
+        
+        def secret_check?
+          self.md5key == self.class.calc_digest(self.service_number, self.sms_text, IfreeSms.config.secret_key, self.now)
         end
     end
   end

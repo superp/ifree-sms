@@ -14,6 +14,11 @@ module IfreeSms
         migration_template "migrate/create_messages.rb", File.join('db/migrate', "ifree_sms_create_messages.rb")
       end
       
+      # copy configurations
+      def copy_configurations
+        copy_file('config/ifree_sms.rb', 'config/initializers/ifree_sms.rb')
+      end
+      
       def self.next_migration_number(dirname)
         if ActiveRecord::Base.timestamped_migrations
           current_time.utc.strftime("%Y%m%d%H%M%S")

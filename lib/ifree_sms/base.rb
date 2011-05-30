@@ -40,8 +40,9 @@ module IfreeSms
         end
       end
       
-      def find_by_sms_text(text)
-        raise "You must define method 'find_by_sms_text(value)' in your polymorphic class"
+      def find_by_sms(value)
+        nil
+        #raise "You must define method 'find_by_sms(value)' in your polymorphic class"
       end
       
       def ifree_sms_cached_column

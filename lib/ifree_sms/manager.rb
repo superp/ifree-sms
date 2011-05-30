@@ -32,7 +32,7 @@ module IfreeSms
       
       def create(env, body = '', status = 500)
         request = Rack::Request.new(env)
-        message = IfreeSms::Message.new(:request => request, :config => @config)
+        message = IfreeSms::Message.new(:request => request)
         
         _run_callbacks(:before_message, env, message)
         
@@ -40,7 +40,7 @@ module IfreeSms
         
         _run_callbacks(:after_message, env, message)
         
-        [status, {'Content-Type' => 'application/xhtml+xml', 'Content-Length' => body.size.to_s}, body]
+        [status, {'Content-Type' => 'application/xml', 'Content-Length' => body.size.to_s}, body]
       end
       
       def smsing_path?(request_path)
