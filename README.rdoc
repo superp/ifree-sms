@@ -44,5 +44,5 @@ Send sms answer to user (asynchronous)
   # sms_id - unique sms id
   IfreeSms::Message.send_sms(phone, text, sms_id)
   
-  # If you want to send sms to custom user, don't put sms_id
+  # If you want to send sms to custom user, don't put sms_id (Paid action)
   IfreeSms::Message.send_sms(phone, text)
