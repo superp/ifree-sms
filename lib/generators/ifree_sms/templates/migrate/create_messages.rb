@@ -7,7 +7,7 @@ class IfreeSmsCreateMessages < ActiveRecord::Migration
       
       # Sms info
       t.integer  :sms_id
-      t.integer  :phone
+      t.integer  :phone, :limit => 8
       t.integer  :service_number
       t.string   :sms_text
       t.datetime :now

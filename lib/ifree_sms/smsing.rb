@@ -89,6 +89,11 @@ module IfreeSms
       end
       
       
+      def send_answer(text)
+        self.class.send_sms(self.phone, text, self.sms_id)
+      end 
+      
+      
       protected
         
         def secret_check?

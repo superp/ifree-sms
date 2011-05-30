@@ -13,6 +13,7 @@ if Object.const_defined?("IfreeSms")
   end
 
   IfreeSms::Manager.after_message do |env, message|
-
+    # set it if you want to send answer for user after message create
+    message.send_answer("some text")
   end
 end
