@@ -1,0 +1,1 @@
+require 'ifree_sms'

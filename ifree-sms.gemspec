@@ -26,7 +26,6 @@ Gem::Specification.new do |s|
     "lib/generators/ifree_sms/templates/config/ifree_sms.rb",
     "lib/generators/ifree_sms/templates/migrate/create_messages.rb",
     "lib/ifree_sms.rb",
-    "lib/ifree_sms/base.rb",
     "lib/ifree_sms/callbacks.rb",
     "lib/ifree_sms/config.rb",
     "lib/ifree_sms/engine.rb",

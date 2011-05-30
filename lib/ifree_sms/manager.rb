@@ -15,8 +15,8 @@ module IfreeSms
       self
     end
     
-    def call(env) # :nodoc:
-      if smsing_path?(env['PATH_INFO']) && env["REQUEST_METHOD"] == "GET"
+    def call(env) # :nodoc:      
+      if smsing_path?(env['PATH_INFO'])
         create(env)
       else
         @app.call(env)

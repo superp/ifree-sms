@@ -12,7 +12,24 @@ The IfreeSms gem for i-free sms provider
 
 Use middleware with options:
 
-  # Initialize IfreeSms and set its configurations.
-  config.app_middleware.use IfreeSms::Manager do |config|
-    config.routes = { "/posts/votes" => "Post" }
+  # Use this hook to configure IfreeSms
+  if Object.const_defined?("IfreeSms")
+    # Initialize IfreeSms and set its configurations.
+    Dodik::Application.config.app_middleware.use IfreeSms::Manager do |c|
+      c.routes = { "/ifree/sms" => "User" }
+    end
+    
+    IfreeSms.setup do |config|
+      config.secret_key = ""
+      config.project_name = ""
+      config.service_number = ""
+    end
+    
+    IfreeSms::Manager.before_message do |env, message|
+      message.answer_text = "put here sms answer for user"
+    end
+
+    IfreeSms::Manager.after_message do |env, message|
+
+    end
   end

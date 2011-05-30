@@ -18,7 +18,7 @@ end
 desc 'Generate documentation for the ifree_sms plugin.'
 Rake::RDocTask.new(:rdoc) do |rdoc|
   rdoc.rdoc_dir = 'rdoc'
-  rdoc.title    = 'BallotBox'
+  rdoc.title    = 'IfreeSms'
   rdoc.options << '--line-numbers' << '--inline-source'
   rdoc.rdoc_files.include('README')
   rdoc.rdoc_files.include('lib/**/*.rb')

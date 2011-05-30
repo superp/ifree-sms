@@ -3,7 +3,6 @@ module IfreeSms
   autoload :Manager,   'ifree_sms/manager'
   autoload :Config,    'ifree_sms/config'
   autoload :Callbacks, 'ifree_sms/callbacks'
-  autoload :Base,      'ifree_sms/base'
   
   mattr_accessor :config
   @@config = Config.new
