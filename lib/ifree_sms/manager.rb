@@ -33,6 +33,8 @@ module IfreeSms
       def create(env, body = '', status = 500)
         request = Rack::Request.new(env)
         message = IfreeSms::Message.new(:request => request)
+        body = ''
+        status = 0
         
         unless message.test?
           _run_callbacks(:before_message, env, message)
