@@ -8,8 +8,8 @@ module IfreeSms
     # end
     #
     # config = Config.new
-    # config.routes = {'/posts/message' => 'Post' }
-    # config[:routes] #=> {'/posts/message' => 'Post' }
+    # config.routes = '/posts/message'
+    # config[:routes] #=> '/posts/message'
     #
     def self.hash_accessor(*names) #:nodoc:
       names.each do |name|
@@ -29,7 +29,7 @@ module IfreeSms
     
     def initialize(other={})
       merge!(other)
-      self[:routes] ||= { "/ifree/sms" => 'Class' }
+      self[:routes] ||= "/ifree/sms"
       self[:secret_key] ||= "some_very_secret_key_given_ifree"
       self[:service_number] ||= "some_service_number"
       self[:project_name] ||= "project_name"

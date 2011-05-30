@@ -12,13 +12,15 @@ The IfreeSms gem for i-free sms provider
 
 Use middleware with options:
 
-  # Use this hook to configure IfreeSms
+  config.app_middleware.use IfreeSms::Manager do |c|
+    c.routes = "/ifree/sms"
+  end
+
+Initialize IfreeSms and set its configurations.
+  
+  # config/initializers/ifree_sms.rb
   if Object.const_defined?("IfreeSms")
-    # Initialize IfreeSms and set its configurations.
-    Dodik::Application.config.app_middleware.use IfreeSms::Manager do |c|
-      c.routes = { "/ifree/sms" => "User" }
-    end
-    
+      
     IfreeSms.setup do |config|
       config.secret_key = ""
       config.project_name = ""
@@ -26,6 +28,7 @@ Use middleware with options:
     end
     
     IfreeSms::Manager.before_message do |env, message|
+      # set it if you want to send answer for user
       message.answer_text = "put here sms answer for user"
     end
 
@@ -33,3 +36,13 @@ Use middleware with options:
 
     end
   end
+  
+Send sms answer to user (asynchronous)
+  
+  # phone format => 380971606179
+  # text length => 160 Latin or 70 Unicode
+  # sms_id - unique sms id
+  IfreeSms::Message.send_sms(phone, text, sms_id)
+  
+  # If you want to send sms to custom user, don't put sms_id
+  IfreeSms::Message.send_sms(phone, text)

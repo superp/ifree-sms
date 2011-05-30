@@ -46,9 +46,7 @@ module IfreeSms
       def smsing_path?(request_path)
         return false if @config.routes.nil?
 
-        @config.routes.keys.any? do |route|
-          route == request_path
-        end
+        @config.routes == request_path
       end
   end
 end

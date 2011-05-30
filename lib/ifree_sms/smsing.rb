@@ -70,12 +70,14 @@ module IfreeSms
         @request = req
       end
       
-      def to_ifree
-        self.answer_text ||= "test answer"
-        
+      def to_ifree        
         answer = self.test.blank? ? self.answer_text : self.test
         
-        "<Response><SmsText>#{answer}</SmsText></Response>"
+        if self.answer_text.blank? && self.test.blank?
+          "<Response noresponse='true'/>"
+        else
+          "<Response><SmsText>#{answer}</SmsText></Response>"
+        end   
       end
       
       def call        
