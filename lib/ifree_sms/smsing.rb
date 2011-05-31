@@ -86,7 +86,7 @@ module IfreeSms
         if self.answer_text.blank?
           "<Response noresponse='true'/>"
         else
-          "<Response><SmsText>#{Base64.encode64(self.answer_text)}</SmsText></Response>"
+          "<Response><SmsText>#{self.answer_text}</SmsText></Response>"
         end   
       end
       
