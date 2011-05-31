@@ -122,7 +122,7 @@ module IfreeSms
         
         def parse_date(value)
           begin
-            DateTime.parse(value)
+            DateTime.strptime(value, "%Y%m%d%H%M%S")
           rescue Exception => e
             nil
           end
