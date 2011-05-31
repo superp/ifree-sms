@@ -21,7 +21,7 @@ module IfreeSms
           validate :check_secret_key
 
           attr_accessible :request
-          attr_accessor :md5key, :test, :answer_text, :encoded_sms_text
+          attr_accessor :md5key, :test, :answer_text
           
           scope :with_messageable, lambda { |record| where(["messageable_id = ? AND messageable_type = ?", record.id, record.class.name]) }
         end
@@ -71,9 +71,13 @@ module IfreeSms
         @request = req
       end
       
+      def encoded_sms_text
+        @encoded_sms_text
+      end
+      
       def encoded_sms_text=(value)
         self.sms_text = Base64.decode64(value) unless value.blank? 
-        super
+        @encoded_sms_text = value
       end
       
       def to_ifree    
