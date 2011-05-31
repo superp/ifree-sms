@@ -7,13 +7,8 @@ if Object.const_defined?("IfreeSms")
     config.service_number = ""
   end
 
-  IfreeSms::Manager.before_message do |env, message|
+  IfreeSms::Manager.incoming_message do |env, message|  
     # set it if you want to send answer for user
     message.answer_text = "put here sms answer for user"
-  end
-
-  IfreeSms::Manager.after_message do |env, message|
-    # set it if you want to send answer for user after message create
-    message.send_answer("some text")
   end
 end

@@ -78,10 +78,14 @@ module IfreeSms
         end   
       end
       
-      def call        
-        if secret_check? && errors.empty? && save
+      def call?
+        secret_check? && errors.empty? && save
+      end
+      
+      def response_to_ifree
+        unless self.new_record?
           [self.to_ifree, 200]
-        else
+        else  
           [self.errors.to_json, 422]
         end
       end

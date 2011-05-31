@@ -14,36 +14,20 @@ module IfreeSms
       end
     end
     
-    # A callback that runs before create message
-    # Example:
-    #   IfreeSms::Manager.before_message do |env, opts|
-    #   end
-    #
-    def before_message(options = {}, method = :push, &block)
-      raise BlockNotGiven unless block_given?
-      _before_message.send(method, [block, options])
-    end
-    
-    # Provides access to the callback array for before_message
-    # :api: private
-    def _before_message
-      @_before_message ||= []
-    end
-    
     # A callback that runs after message created
     # Example:
-    #   IfreeSms::Manager.after_message do |env, opts|
+    #   IfreeSms::Manager.incoming_message do |env, opts|
     #   end
     #
-    def after_message(options = {}, method = :push, &block)
+    def incoming_message(options = {}, method = :push, &block)
       raise BlockNotGiven unless block_given?
-      _after_message.send(method, [block, options])
+      _incoming_message.send(method, [block, options])
     end
     
-    # Provides access to the callback array for after_message
+    # Provides access to the callback array for incoming_message
     # :api: private
-    def _after_message
-      @_after_message ||= []
+    def _incoming_message
+      @_incoming_message ||= []
     end
   end
 end

@@ -27,14 +27,9 @@ Initialize IfreeSms and set its configurations.
       config.service_number = ""
     end
     
-    IfreeSms::Manager.before_message do |env, message|
+    IfreeSms::Manager.incoming_message do |env, message|  
       # set it if you want to send answer for user
       message.answer_text = "put here sms answer for user"
-    end
-
-    IfreeSms::Manager.after_message do |env, message|
-      # set it if you want to send answer for user after message create
-      message.send_answer("some text")
     end
   end
   
@@ -44,6 +39,8 @@ Send sms answer to user (asynchronous)
   # text length => 160 Latin or 70 Unicode
   # sms_id - unique sms id
   IfreeSms::Message.send_sms(phone, text, sms_id)
+  # or
+  IfreeSms::Message.first.send_answer("some text")
   
   # If you want to send sms to custom user, don't put sms_id (Paid action)
   IfreeSms::Message.send_sms(phone, text)
