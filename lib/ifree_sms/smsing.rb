@@ -96,7 +96,7 @@ module IfreeSms
         unless self.new_record?
           [self.to_ifree, 200]
         else  
-          [self.errors.to_json, 422]
+          [self.errors.to_xml, 422]
         end
       end
       
