@@ -63,7 +63,7 @@ module IfreeSms
         self.phone = req.params["phone"].to_i
         self.service_number = req.params["serviceNumber"].to_i
         self.sms_text = req.params["smsText"]
-        self.now = req.params["now"]
+        self.now = parse_date(req.params["now"])
         self.md5key = req.params["md5key"]
         self.test = req.params["test"]
         #self.messageable = messageable.class.find_by_sms(self)
@@ -95,7 +95,6 @@ module IfreeSms
         self.class.send_sms(self.phone, text, self.sms_id)
       end 
       
-      
       protected
         
         def check_secret_key
@@ -104,6 +103,14 @@ module IfreeSms
         
         def valid_secret?
           self.md5key == self.class.calc_digest(service_number, sms_text, I18n.l(now, :format => "%Y%m%d%H%M%S"))
+        end
+        
+        def parse_date(value)
+          begin
+            DateTime.parse(value)
+          rescue Exception => e
+            nil
+          end
         end
     end
   end
