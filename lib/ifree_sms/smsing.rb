@@ -48,6 +48,8 @@ module IfreeSms
       end
       
       def calc_digest(number, text, now)
+        Rails.logger.info("service_number: #{number.to_s}, sms_text: #{text.to_s}, now: #{now.to_s}, secret: #{IfreeSms.config.secret_key}")  if IfreeSms.config.debug
+        
         Digest::MD5.hexdigest(number.to_s + text.to_s + IfreeSms.config.secret_key + now.to_s)
       end
  
@@ -114,10 +116,14 @@ module IfreeSms
           errors.add(:md5key, :invalid) unless valid_secret?
         end
         
-        def valid_secret?
+        def valid_secret?          
           return false if now.nil?
           
-          self.md5key == self.class.calc_digest(service_number, encoded_sms_text, now.strftime("%Y%m%d%H%M%S"))
+          digest = self.class.calc_digest(service_number, encoded_sms_text, now.strftime("%Y%m%d%H%M%S"))
+          
+          Rails.logger.info("md5key: #{md5key}, calc_digest: #{digest}") if IfreeSms.config.debug
+          
+          self.md5key == digest
         end
         
         def parse_date(value)

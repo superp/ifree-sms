@@ -25,6 +25,7 @@ Initialize IfreeSms and set its configurations.
       config.secret_key = ""
       config.project_name = ""
       config.service_number = ""
+      config.debug = true
     end
     
     IfreeSms::Manager.incoming_message do |env, message|  

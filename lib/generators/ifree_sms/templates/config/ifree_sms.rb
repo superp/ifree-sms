@@ -5,6 +5,7 @@ if Object.const_defined?("IfreeSms")
     config.secret_key = ""
     config.project_name = ""
     config.service_number = ""
+    config.debug = true
   end
 
   IfreeSms::Manager.incoming_message do |env, message|  
