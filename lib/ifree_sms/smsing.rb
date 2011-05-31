@@ -21,7 +21,7 @@ module IfreeSms
           validate :check_secret_key
 
           attr_accessible :request
-          attr_accessor :md5key, :test, :answer_text
+          attr_accessor :md5key, :test, :answer_text, :encoded_sms_text
           
           scope :with_messageable, lambda { |record| where(["messageable_id = ? AND messageable_type = ?", record.id, record.class.name]) }
         end
@@ -38,7 +38,7 @@ module IfreeSms
         params[:serviceNumber] = IfreeSms.config.service_number
         params[:smsText] = Base64.encode64(text)
         params[:now] = now
-        params[:md5key] = calc_digest(IfreeSms.config.service_number, text, now)
+        params[:md5key] = calc_digest(IfreeSms.config.service_number, params[:smsText], now)
         
         
         c = Curl::Easy.new("http://srv1.com.ua/#{IfreeSms.config.project_name}/second.php?#{Rack::Utils.build_query(params)}")
@@ -63,11 +63,11 @@ module IfreeSms
         self.sms_id = req.params["smsId"].to_i
         self.phone = req.params["phone"].to_i
         self.service_number = req.params["serviceNumber"].to_i
+        self.encoded_sms_text = req.params["smsText"]
         self.sms_text = Base64.decode64(req.params["smsText"])
         self.now = parse_date(req.params["now"])
         self.md5key = req.params["md5key"]
         self.test = req.params["test"]
-        #self.messageable = messageable.class.find_by_sms(self)
         
         @request = req
       end
@@ -107,9 +107,9 @@ module IfreeSms
         end
         
         def valid_secret?
-          return false if now.blank?
+          return false if now.nil?
           
-          self.md5key == self.class.calc_digest(service_number, sms_text, I18n.l(now, :format => "%Y%m%d%H%M%S"))
+          self.md5key == self.class.calc_digest(service_number, encoded_sms_text, I18n.l(now, :format => "%Y%m%d%H%M%S"))
         end
         
         def parse_date(value)
