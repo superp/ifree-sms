@@ -30,7 +30,7 @@ module IfreeSms
       def send_sms(phone, text, sms_id='noID')
         #http://srv1.com.ua/mcdonalds/second.php?smsId=noID&phone=380971606179&serviceNumber=3533&smsText=test-message&md5key=f920c72547012ece62861938b7731415&now=20110527160613
         
-        now = I18n.l(DateTime.now, :format => "%Y%m%d%H%M%S")
+        now = DateTime.now.strftime("%Y%m%d%H%M%S")
         
         params = {}
         params[:smsId] = sms_id
@@ -117,7 +117,7 @@ module IfreeSms
         def valid_secret?
           return false if now.nil?
           
-          self.md5key == self.class.calc_digest(service_number, encoded_sms_text, I18n.l(now, :format => "%Y%m%d%H%M%S"))
+          self.md5key == self.class.calc_digest(service_number, encoded_sms_text, now.strftime("%Y%m%d%H%M%S"))
         end
         
         def parse_date(value)
