@@ -64,12 +64,16 @@ module IfreeSms
         self.phone = req.params["phone"].to_i
         self.service_number = req.params["serviceNumber"].to_i
         self.encoded_sms_text = req.params["smsText"]
-        self.sms_text = Base64.decode64(req.params["smsText"])
         self.now = parse_date(req.params["now"])
         self.md5key = req.params["md5key"]
         self.test = req.params["test"]
         
         @request = req
+      end
+      
+      def encoded_sms_text=(value)
+        self.sms_text = Base64.decode64(value) unless value.blank? 
+        super
       end
       
       def to_ifree    
