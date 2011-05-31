@@ -1,5 +1,4 @@
 # encoding: utf-8
-require "curb"
 require 'digest/md5'
 require "base64"
 
@@ -27,32 +26,11 @@ module IfreeSms
         end
       end
       
-      def send_sms(phone, text, sms_id='noID')
-        #http://srv1.com.ua/mcdonalds/second.php?smsId=noID&phone=380971606179&serviceNumber=3533&smsText=test-message&md5key=f920c72547012ece62861938b7731415&now=20110527160613
-        
-        now = DateTime.now.utc.strftime("%Y%m%d%H%M%S")
-        
-        params = {}
-        params[:smsId] = sms_id
-        params[:phone] = phone
-        params[:serviceNumber] = IfreeSms.config.service_number
-        params[:smsText] = Base64.encode64(text)
-        params[:now] = now
-        params[:md5key] = calc_digest(IfreeSms.config.service_number, params[:smsText], now)
-        
-        
-        c = Curl::Easy.new("http://srv1.com.ua/#{IfreeSms.config.project_name}/second.php?#{Rack::Utils.build_query(params)}")
-        
-        c.perform
-        c.body_str
-      end
-      
       def calc_digest(number, text, now)
-        Rails.logger.info("service_number: #{number.to_s}, sms_text: #{text.to_s}, now: #{now.to_s}, secret: #{IfreeSms.config.secret_key}")  if IfreeSms.config.debug
+        IfreeSms.log("service_number: #{number}, sms_text: #{text}, now: #{now}, secret: #{IfreeSms.config.secret_key}")
         
         Digest::MD5.hexdigest(number.to_s + text.to_s + IfreeSms.config.secret_key + now.to_s)
       end
- 
     end
     
     module InstanceMethods
@@ -107,7 +85,7 @@ module IfreeSms
       end
       
       def send_answer(text)
-        self.class.send_sms(self.phone, text, self.sms_id)
+        IfreeSms.send_sms(self.phone, text, self.sms_id)
       end 
       
       protected
@@ -121,7 +99,7 @@ module IfreeSms
           
           digest = self.class.calc_digest(service_number, encoded_sms_text, now.utc.strftime("%Y%m%d%H%M%S"))
           
-          Rails.logger.info("md5key: #{md5key}, calc_digest: #{digest}") if IfreeSms.config.debug
+          IfreeSms.log("md5key: #{md5key}, calc_digest: #{digest}")
           
           self.md5key == digest
         end

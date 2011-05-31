@@ -35,5 +35,9 @@ module IfreeSms
       self[:project_name] ||= "project_name"
       self[:debug] ||= false
     end
+    
+    def url
+      "http://srv1.com.ua/#{self[:project_name]}/second.php"
+    end
   end
 end

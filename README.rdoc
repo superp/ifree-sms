@@ -36,16 +36,22 @@ Initialize IfreeSms and set its configurations.
   
 Send sms answer to user (asynchronous)
   
-  # phone format => 380971606179
-  # text length => 160 Latin or 70 Unicode
-  # sms_id - unique sms id
-  IfreeSms::Message.send_sms(phone, text, sms_id)
-  # or
+ * phone format => 380971606179
+ * text length => 160 Latin or 70 Unicode
+ * sms_id - unique sms id
+  
+  IfreeSms.send_sms(phone, text, sms_id)
+  
+or
+
   IfreeSms::Message.first.send_answer("some text")
   
-  # If you want to send sms to custom user, don't put sms_id (Paid action)
-  IfreeSms::Message.send_sms(phone, text)
+If you want to send sms to custom user, don't put sms_id (Paid action)
   
-Dependences {curb}[https://github.com/taf2/curb]
+  IfreeSms.send_sms(phone, text)
+  
+== Dependences
+
+* {curb}[https://github.com/taf2/curb]
   
   sudo apt-get install libcurl3 libcurl3-gnutls libcurl4-openssl-dev
