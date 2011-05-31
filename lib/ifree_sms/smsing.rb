@@ -1,6 +1,7 @@
 # encoding: utf-8
 require "curb"
 require 'digest/md5'
+require "base64"
 
 module IfreeSms
   module Smsing
@@ -35,7 +36,7 @@ module IfreeSms
         params[:smsId] = sms_id
         params[:phone] = phone
         params[:serviceNumber] = IfreeSms.config.service_number
-        params[:smsText] = text
+        params[:smsText] = Base64.encode64(text)
         params[:now] = now
         params[:md5key] = calc_digest(IfreeSms.config.service_number, text, now)
         
@@ -62,7 +63,7 @@ module IfreeSms
         self.sms_id = req.params["smsId"].to_i
         self.phone = req.params["phone"].to_i
         self.service_number = req.params["serviceNumber"].to_i
-        self.sms_text = req.params["smsText"]
+        self.sms_text = Base64.decode64(req.params["smsText"])
         self.now = parse_date(req.params["now"])
         self.md5key = req.params["md5key"]
         self.test = req.params["test"]
@@ -75,8 +76,12 @@ module IfreeSms
         if self.answer_text.blank?
           "<Response noresponse='true'/>"
         else
-          "<Response><SmsText>#{self.answer_text}</SmsText></Response>"
+          "<Response><SmsText>#{Base64.encode64(self.answer_text)}</SmsText></Response>"
         end   
+      end
+      
+      def test_to_ifree
+        "<Response><SmsText>#{message.test}</SmsText></Response>"
       end
       
       def response_to_ifree
@@ -102,6 +107,8 @@ module IfreeSms
         end
         
         def valid_secret?
+          return false if now.blank?
+          
           self.md5key == self.class.calc_digest(service_number, sms_text, I18n.l(now, :format => "%Y%m%d%H%M%S"))
         end
         

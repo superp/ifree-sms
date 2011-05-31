@@ -39,7 +39,7 @@ module IfreeSms
           
           body, status = message.response_to_ifree
         else
-          body, status = ["<Response><SmsText>#{message.test}</SmsText></Response>", 200]
+          body, status = [message.test_to_ifree, 200]
         end
         
         [status, {'Content-Type' => 'application/xml', 'Content-Length' => body.size.to_s}, body]
