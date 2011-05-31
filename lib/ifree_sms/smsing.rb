@@ -85,7 +85,7 @@ module IfreeSms
       end
       
       def test_to_ifree
-        "<Response><SmsText>#{message.test}</SmsText></Response>"
+        "<Response><SmsText>#{self.test}</SmsText></Response>"
       end
       
       def response_to_ifree
