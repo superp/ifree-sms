@@ -35,7 +35,7 @@ module IfreeSms
         message = IfreeSms::Message.new(:request => request)
         
         unless message.test?          
-          _run_callbacks(:incoming_message, env, message) if message.call?
+          _run_callbacks(:incoming_message, env, message) if message.save
           
           body, status = message.response_to_ifree
         else

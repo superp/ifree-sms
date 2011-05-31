@@ -17,6 +17,7 @@ module IfreeSms
           
           # Validations
           validates :sms_id, :phone, :service_number, :sms_text, :now, :presence => true
+          validate :check_secret_key
 
           attr_accessible :request
           attr_accessor :md5key, :test, :answer_text
@@ -78,10 +79,6 @@ module IfreeSms
         end   
       end
       
-      def call?
-        secret_check? && errors.empty? && save
-      end
-      
       def response_to_ifree
         unless self.new_record?
           [self.to_ifree, 200]
@@ -101,8 +98,12 @@ module IfreeSms
       
       protected
         
-        def secret_check?
-          self.md5key == self.class.calc_digest(self.service_number, self.sms_text, I18n.l(self.now, :format => "%Y%m%d%H%M%S"))
+        def check_secret_key
+          errors.add(:md5key, :invalid) unless valid_secret?
+        end
+        
+        def valid_secret?
+          self.md5key == self.class.calc_digest(service_number, sms_text, I18n.l(now, :format => "%Y%m%d%H%M%S"))
         end
     end
   end
