@@ -1,5 +1,4 @@
 # encoding: utf-8
-require 'digest/md5'
 require "base64"
 
 module IfreeSms
@@ -24,12 +23,6 @@ module IfreeSms
           
           scope :with_messageable, lambda { |record| where(["messageable_id = ? AND messageable_type = ?", record.id, record.class.name]) }
         end
-      end
-      
-      def calc_digest(number, text, now)
-        IfreeSms.log("service_number: #{number}, sms_text: #{text}, now: #{now}, secret: #{IfreeSms.config.secret_key}")
-        
-        Digest::MD5.hexdigest(number.to_s + text.to_s + IfreeSms.config.secret_key + now.to_s)
       end
     end
     
@@ -97,7 +90,7 @@ module IfreeSms
         def valid_secret?          
           return false if now.nil?
           
-          digest = self.class.calc_digest(service_number, encoded_sms_text, now.utc.strftime("%Y%m%d%H%M%S"))
+          digest = IfreeSms.calc_digest(service_number, encoded_sms_text, now.utc.strftime("%Y%m%d%H%M%S"))
           
           IfreeSms.log("md5key: #{md5key}, calc_digest: #{digest}")
           

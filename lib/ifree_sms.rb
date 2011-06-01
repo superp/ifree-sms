@@ -1,6 +1,7 @@
 # encoding: utf-8
 require "curb"
 require "base64"
+require 'digest/md5'
 
 module IfreeSms
   autoload :Smsing,    'ifree_sms/smsing'
@@ -35,15 +36,32 @@ module IfreeSms
     params = {}
     params[:smsId] = sms_id
     params[:phone] = phone
-    params[:serviceNumber] = IfreeSms.config.service_number
+    params[:serviceNumber] = config.service_number
     params[:smsText] = Base64.encode64(text)
     params[:now] = now
-    params[:md5key] = calc_digest(IfreeSms.config.service_number, params[:smsText], now)
+    params[:md5key] = calc_digest(config.service_number, params[:smsText], now)
     
+    get(params)
+  end
+  
+  def self.get(params)
+    query = Rack::Utils.build_query(params)
+    url = [config.url, query].join('?')
     
-    c = Curl::Easy.new([IfreeSms.config.url, Rack::Utils.build_query(params)].join('?'))
-    c.perform
-    c.body_str
+    log("request: #{url}")
+    
+    http = Curl::Easy.new(url)
+    http.perform
+    
+    log("response: #{http.body_str}")
+    
+    http.body_str
+  end
+  
+  def self.calc_digest(number, text, now)
+    log("service_number: #{number}, sms_text: #{text}, now: #{now}, secret: #{config.secret_key}")
+    
+    Digest::MD5.hexdigest([number, text, config.secret_key, now].map(&:to_s).join)
   end
 end
 
