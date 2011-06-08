@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Igor Galeta", "Pavlo Galeta"]
-  s.date = %q{2011-05-30}
+  s.date = %q{2011-06-08}
   s.description = %q{The IfreeSms gem for i-free sms provider}
   s.email = %q{superp1987@gmail.com}
   s.extra_rdoc_files = [
