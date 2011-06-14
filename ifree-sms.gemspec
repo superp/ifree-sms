@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{ifree-sms}
-  s.version = "0.1.0"
+  s.version = "0.1.1"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Igor Galeta", "Pavlo Galeta"]
-  s.date = %q{2011-06-08}
+  s.date = %q{2011-06-14}
   s.description = %q{The IfreeSms gem for i-free sms provider}
   s.email = %q{superp1987@gmail.com}
   s.extra_rdoc_files = [
@@ -31,6 +31,8 @@ Gem::Specification.new do |s|
     "lib/ifree_sms/config.rb",
     "lib/ifree_sms/engine.rb",
     "lib/ifree_sms/manager.rb",
+    "lib/ifree_sms/response.rb",
+    "lib/ifree_sms/smsdirect_api.rb",
     "lib/ifree_sms/smsing.rb",
     "lib/ifree_sms/version.rb"
   ]

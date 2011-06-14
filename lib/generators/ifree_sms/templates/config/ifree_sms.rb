@@ -5,6 +5,8 @@ if Object.const_defined?("IfreeSms")
     config.secret_key = ""
     config.project_name = ""
     config.service_number = ""
+    config.login = ""
+    config.password = ""
     config.debug = true
   end
 

@@ -8,9 +8,57 @@ module IfreeSms
   autoload :Manager,   'ifree_sms/manager'
   autoload :Config,    'ifree_sms/config'
   autoload :Callbacks, 'ifree_sms/callbacks'
+  autoload :Response,  'ifree_sms/response'
+  autoload :SMSDirectAPIMethods, 'ifree_sms/smsdirect_api'
   
   mattr_accessor :config
   @@config = Config.new
+  
+  class API
+    # initialize with an access token
+    def initialize(login = nil, pass = nil)
+      @login = login || IfreeSms.config.login
+      @pass = pass || IfreeSms.config.password
+    end
+    attr_reader :access_token
+
+    def api(path, args = {}, verb = "get", options = {}, &error_checking_block)
+      # Fetches the given path in the Graph API.
+      args["login"] = @login
+      args["pass"] = @pass
+      
+      # add a leading /
+      path = "/#{path}" unless path =~ /^(\/|http|https|ftp)/
+
+      # make the request via the provided service
+      result = IfreeSms.make_request(path, args, verb, options)
+
+      # Check for any 500 errors before parsing the body
+      # since we're not guaranteed that the body is valid JSON
+      # in the case of a server error
+      raise APIError.new({"type"=>"HTTP #{result.status.to_s}", "message"=>"Response body: #{result.body}"}) if result.status >= 500
+      
+      body = result.body
+      yield body if error_checking_block
+
+      # if we want a component other than the body (e.g. redirect header for images), return that
+      options[:http_component] ? result.send(options[:http_component]) : body
+    end
+  end
+  
+  class APIError < StandardError
+    attr_accessor :sms_error_type
+    def initialize(details = {})
+      self.sms_error_type = details["type"]
+      super("#{sms_error_type}: #{details["message"]}")
+    end
+  end
+  
+  # APIs
+  
+  class SMSDirectAPI < API
+    include SMSDirectAPIMethods
+  end
   
   def self.setup(&block)
     yield config
@@ -25,28 +73,10 @@ module IfreeSms
   def self.table_name_prefix
     'ifree_sms_'
   end
- 
-  # Send sms message
-  # Sample request:
-  # http://srv1.com.ua/mcdonalds/second.php?smsId=noID&phone=380971606179&serviceNumber=3533&smsText=test-message&md5key=f920c72547012ece62861938b7731415&now=20110527160613
-  #
-  def self.send_sms(phone, text, sms_id='noID')
-    now = Time.now.utc.strftime("%Y%m%d%H%M%S")
-    
-    params = {}
-    params[:smsId] = sms_id
-    params[:phone] = phone
-    params[:serviceNumber] = config.service_number
-    params[:smsText] = Base64.encode64(text)
-    params[:now] = now
-    params[:md5key] = calc_digest(config.service_number, params[:smsText], now)
-    
-    get(params)
-  end
   
-  def self.get(params)
+  def self.make_request(path, params, verb, options = {})
     query = Rack::Utils.build_query(params)
-    url = [config.url, query].join('?')
+    url = [path, query].join('?')
     
     log("request: #{url}")
     
@@ -55,7 +85,7 @@ module IfreeSms
     
     log("response: #{http.body_str}")
     
-    http.body_str
+    Response.new(http.response_code, http.body_str, http.headers)
   end
   
   def self.calc_digest(number, text, now)

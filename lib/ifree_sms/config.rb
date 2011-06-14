@@ -25,7 +25,7 @@ module IfreeSms
       end
     end
     
-    hash_accessor :routes, :secret_key, :service_number, :project_name, :debug
+    hash_accessor :routes, :secret_key, :service_number, :project_name, :login, :password, :debug
     
     def initialize(other={})
       merge!(other)
@@ -33,6 +33,8 @@ module IfreeSms
       self[:secret_key] ||= "some_very_secret_key_given_ifree"
       self[:service_number] ||= "some_service_number"
       self[:project_name] ||= "project_name"
+      self[:login] ||= "demo"
+      self[:password] ||= "demo"
       self[:debug] ||= false
     end
     

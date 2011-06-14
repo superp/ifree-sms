@@ -34,21 +34,19 @@ Initialize IfreeSms and set its configurations.
     end
   end
   
-Send sms answer to user (asynchronous)
+Send sms message to user (asynchronous)
   
- * phone format => 380971606179
- * text length => 160 Latin or 70 Unicode
- * sms_id - unique sms id
+ * phone - format => 380971606179
+ * text - length => 160 Latin or 70 Unicode (encoding utf-8)
+ * from - sender title, max length: 11
   
-  IfreeSms.send_sms(phone, text, sms_id)
+  smsdirect = IfreeSms::SMSDirectAPI.new(login, password)
+  
+  smsdirect.submit_message(phone, text, from)
   
 or
 
   IfreeSms::Message.first.send_answer("some text")
-  
-If you want to send sms to custom user, don't put sms_id (Paid action)
-  
-  IfreeSms.send_sms(phone, text)
   
 == Dependences
 
