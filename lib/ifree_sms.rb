@@ -60,13 +60,15 @@ module IfreeSms
     include SMSDirectAPIMethods
   end
   
+  # Class methods
+  
   def self.setup(&block)
     yield config
   end
   
   def self.log(message)
     if IfreeSms.config.debug
-      Rails.logger.info("[IfreeSms] #{message}")
+      Rails.logger.info("[Ifree #{Time.now.strftime('%d.%m.%Y %H:%M')}] #{message}")
     end
   end
   
